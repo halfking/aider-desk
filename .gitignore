@@ -1,5 +1,6 @@
 .idea
 .vscode
+.codegraph/
 node_modules
 dist
 out
