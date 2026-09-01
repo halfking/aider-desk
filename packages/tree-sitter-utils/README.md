@@ -96,6 +96,15 @@ const parseResult = await analyzer.parseFile('/path/to/file.ts');
 - OCaml / OCaml Interface
 - Haskell
 - Julia
+- Kotlin
+- Elixir
+- Elm
+- Zig
+- QL
+- HCL
+- Elisp
+- MATLAB
+- Fortran
 
 ## Configuration Options
 
