@@ -48,10 +48,15 @@ AiderDesk must be running for the MCP server to communicate with it.
 
 | Tool | Description |
 |------|-------------|
+| `list_tasks` | List all AiderDesk tasks for the configured project. |
+| `create_task` | Create a new AiderDesk task in the configured project. |
+| `get_task` | Retrieve details of a specific AiderDesk task by its ID. |
 | `add_context_file` | Add a file to AiderDesk's context. |
 | `drop_context_file` | Remove a file from AiderDesk's context. |
 | `get_context_files` | List files currently in AiderDesk's context. |
 | `get_addable_files` | List project files available to be added to the context. |
+| `get_updated_files` | List files that were created, modified, or deleted during an AiderDesk task. |
+| `get_context_messages` | Retrieve the conversation history (context messages) of an AiderDesk task, with optional pagination and negative offsets from the end. |
 | `run_prompt` | Execute a prompt within AiderDesk. |
 | `clear_context` | Clear the context of AiderDesk. |
 
