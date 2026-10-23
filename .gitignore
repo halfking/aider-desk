@@ -1,6 +1,7 @@
 .idea
 .air
 .vscode
+.codegraph/
 node_modules
 dist
 out
