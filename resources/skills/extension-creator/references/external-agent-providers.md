@@ -87,4 +87,4 @@ A native session ID is not enough if its database is deleted at the end of each 
 - Confirm the UI receives original tool-result shapes, not MCP text-block arrays where strings or structured Power results are expected.
 - Verify cleanup of owned resources and document any dependency on core changes in both the README and the handoff to the user.
 
-Examples: [OpenCode Free](https://github.com/hotovo/aider-desk/tree/main/packages/extensions/extensions/opencode-free/) for native/MCP integration and [Cursor SDK](https://github.com/hotovo/aider-desk/tree/main/packages/extensions/extensions/cursor-sdk/) for extension-owned orchestration.
+Examples: [Claude Agent SDK](https://github.com/hotovo/aider-desk/tree/main/packages/extensions/extensions/claude-agent-sdk/) for native/MCP integration and [Cursor SDK](https://github.com/hotovo/aider-desk/tree/main/packages/extensions/extensions/cursor-sdk/) for extension-owned orchestration.

@@ -35,7 +35,7 @@ Integrates the [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk
 ## How It Works
 
 1. Registers `claude-agent-sdk` as an LLM provider in AiderDesk
-2. Provides three models: `haiku`, `sonnet`, and `opus`
+2. Provides four models: `haiku`, `sonnet`, `opus`, and `fable`
 3. Forwards AiderDesk's tools to Claude Code via the AI SDK
 4. Optimizes tool output (trims large responses from aider/subagent tools)
 5. Converts JSON Schema tool inputs to Zod schemas (required by Claude Agent SDK)
@@ -54,6 +54,7 @@ Integrates the [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk
 | haiku | 200K | 64K |
 | sonnet | 200K | 64K (default) |
 | opus | 200K | 64K |
+| fable | 1M | 64K |
 
 ## Mode Support
 
@@ -73,6 +74,7 @@ No additional configuration is needed. Once the extension is loaded and Claude C
 - `claude-agent-sdk/haiku`
 - `claude-agent-sdk/sonnet`
 - `claude-agent-sdk/opus`
+- `claude-agent-sdk/fable`
 
 ### Important Notes
 

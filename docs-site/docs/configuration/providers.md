@@ -425,6 +425,7 @@ Go to **Settings → Extensions → Available**, find the Claude Agent SDK exten
 - **haiku**: 200K input tokens, 64K output tokens
 - **sonnet**: 200K input tokens, 64K output tokens (default)
 - **opus**: 200K input tokens, 64K output tokens
+- **fable**: 1M input tokens, 64K output tokens
 
 ### Mode Support
 

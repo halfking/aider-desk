@@ -104,12 +104,12 @@ Inject your project-specific shell commands, linters, and test suites directly i
 
 <table>
   <tr>
-    <td width="50%" align="center"><img src="docs-site/docs/images/worktrees.gif" alt="Worktrees" /><br/>Git Worktrees</td>
-    <td width="50%" align="center"><img src="docs-site/docs/images/advanced-task-management.gif" alt="Diff Review" /><br/>Advanced Task Management</td>
+    <td width="50%" align="center"><img src="docs-site/docs/images/worktree-creation.gif" alt="Worktrees" /><br/>Git Worktrees</td>
+    <td width="50%" align="center"><img src="docs-site/docs/images/diff-viewer-modes.gif" alt="Diff Review" /><br/>Advanced Task Management</td>
   </tr>
   <tr>
-    <td width="50%" align="center"><img src="docs-site/docs/images/model-library.gif" alt="Model Library" /><br/>Model Library</td>
-    <td width="50%" align="center"><img src="docs-site/docs/images/usage-dashboard.gif" alt="Usage Dashboard" /><br/>Usage Dashboard</td>
+    <td width="50%" align="center"><img src="docs-site/docs/images/model-library.png" alt="Model Library" /><br/>Model Library</td>
+    <td width="50%" align="center"><img src="docs-site/docs/images/usage-dashboard-main.png" alt="Usage Dashboard" /><br/>Usage Dashboard</td>
   </tr>
   <tr>
     <td width="50%" align="center"><img src="docs-site/docs/images/settings.gif" alt="Settings" /><br/>Settings</td>
