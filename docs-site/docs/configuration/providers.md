@@ -450,6 +450,7 @@ This provider **only works in Agent mode**:
 
 ### Limitations
 
+- **Binary Files**: The Binary Files extension supports PNG, JPEG, GIF, WebP images and PDFs with this provider. Other binary formats return an unsupported-media error; they are not sent as base64 text. Attachments are preserved when resuming a session.
 - **Message Editing**: Redo user message, Edit last user message, and Delete message actions do not work as expected because the provider does not support session modification
 - **Token Usage Tracking**: Currently, it's not possible to properly track the model's token usage
 
