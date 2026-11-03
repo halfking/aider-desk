@@ -1,6 +1,18 @@
 {
   "extensions": [
     {
+      "id": "opencode-free",
+      "name": "OpenCode Free",
+      "description": "Free OpenCode models with native shell/read and AiderDesk tools over MCP",
+      "folder": "opencode-free",
+      "type": "folder",
+      "hasDependencies": true,
+      "capabilities": [
+        "providers"
+      ],
+      "installCount": 6
+    },
+    {
       "id": "jev",
       "name": "Jev",
       "description": "Jev decision-model tools: typed yes/no, choice, and score questions about files, command output, or state",
@@ -10,7 +22,7 @@
       "capabilities": [
         "tools"
       ],
-      "installCount": 15
+      "installCount": 19
     },
     {
       "id": "binary-files",
@@ -23,7 +35,7 @@
         "tools",
         "ui"
       ],
-      "installCount": 40
+      "installCount": 42
     },
     {
       "id": "wakatime",
@@ -71,7 +83,7 @@
         "commands",
         "ui"
       ],
-      "installCount": 49
+      "installCount": 52
     },
     {
       "id": "theme",
@@ -93,7 +105,7 @@
       "capabilities": [
         "modes"
       ],
-      "installCount": 107
+      "installCount": 118
     },
     {
       "id": "protected-paths",
@@ -105,7 +117,7 @@
       "capabilities": [
         "security"
       ],
-      "installCount": 52
+      "installCount": 55
     },
     {
       "id": "permission-gate",
@@ -116,7 +128,7 @@
       "capabilities": [
         "security"
       ],
-      "installCount": 39
+      "installCount": 40
     },
     {
       "id": "ultrathink",
@@ -127,7 +139,7 @@
       "capabilities": [
         "optimization"
       ],
-      "installCount": 51
+      "installCount": 55
     },
     {
       "id": "external-rules",
@@ -139,7 +151,7 @@
       "capabilities": [
         "context"
       ],
-      "installCount": 31
+      "installCount": 33
     },
     {
       "id": "external-skills",
@@ -151,7 +163,7 @@
       "capabilities": [
         "context"
       ],
-      "installCount": 69
+      "installCount": 77
     },
     {
       "id": "learn",
@@ -164,7 +176,7 @@
         "commands",
         "tools"
       ],
-      "installCount": 96
+      "installCount": 108
     },
     {
       "id": "legacy-system-prompt",
@@ -176,7 +188,7 @@
       "capabilities": [
         "context"
       ],
-      "installCount": 16
+      "installCount": 17
     },
     {
       "id": "sound-notification",
@@ -188,7 +200,7 @@
       "capabilities": [
         "notifications"
       ],
-      "installCount": 34
+      "installCount": 38
     },
     {
       "id": "sandbox",
@@ -204,7 +216,7 @@
         "linux",
         "macos"
       ],
-      "installCount": 13
+      "installCount": 14
     },
     {
       "id": "rtk",
@@ -221,7 +233,7 @@
         "linux",
         "macos"
       ],
-      "installCount": 30
+      "installCount": 34
     },
     {
       "id": "redact-secrets",
@@ -233,7 +245,7 @@
       "capabilities": [
         "security"
       ],
-      "installCount": 30
+      "installCount": 31
     },
     {
       "id": "chunkhound-search",
@@ -245,7 +257,7 @@
       "capabilities": [
         "search"
       ],
-      "installCount": 16
+      "installCount": 17
     },
     {
       "id": "chunkhound-on-semantic-search-tool",
@@ -257,7 +269,7 @@
       "capabilities": [
         "search"
       ],
-      "installCount": 16
+      "installCount": 17
     },
     {
       "id": "tree-sitter-repo-map",
@@ -270,7 +282,7 @@
         "context",
         "commands"
       ],
-      "installCount": 80
+      "installCount": 85
     },
     {
       "id": "context-autocompletion-words",
@@ -282,7 +294,7 @@
       "capabilities": [
         "context"
       ],
-      "installCount": 25
+      "installCount": 29
     },
     {
       "id": "lsp",
@@ -295,7 +307,7 @@
         "tools",
         "code-intelligence"
       ],
-      "installCount": 89
+      "installCount": 93
     },
     {
       "id": "plannotator",
@@ -310,7 +322,7 @@
         "commands",
         "workflows"
       ],
-      "installCount": 26
+      "installCount": 30
     },
     {
       "id": "programmatic-tool-calls",
@@ -322,7 +334,7 @@
       "capabilities": [
         "tools"
       ],
-      "installCount": 38
+      "installCount": 45
     },
     {
       "id": "ui-placement-demo",
@@ -334,7 +346,7 @@
         "ui",
         "example"
       ],
-      "installCount": 15
+      "installCount": 19
     },
     {
       "id": "multi-model-run",
@@ -347,7 +359,7 @@
         "ui",
         "workflows"
       ],
-      "installCount": 16
+      "installCount": 17
     },
     {
       "id": "providers-quota-extension",
@@ -359,7 +371,7 @@
       "capabilities": [
         "ui"
       ],
-      "installCount": 8
+      "installCount": 9
     },
     {
       "id": "openai-codex",
@@ -371,7 +383,7 @@
       "capabilities": [
         "providers"
       ],
-      "installCount": 31
+      "installCount": 37
     },
     {
       "id": "fff",
@@ -388,7 +400,7 @@
         "linux",
         "macos"
       ],
-      "installCount": 39
+      "installCount": 41
     },
     {
       "id": "searxng-search",
@@ -401,7 +413,7 @@
         "tools",
         "search"
       ],
-      "installCount": 31
+      "installCount": 33
     },
     {
       "id": "seek",
@@ -418,7 +430,7 @@
         "linux",
         "macos"
       ],
-      "installCount": 17
+      "installCount": 19
     },
     {
       "id": "tps-counter",
@@ -430,7 +442,7 @@
       "capabilities": [
         "metrics"
       ],
-      "installCount": 104
+      "installCount": 114
     },
     {
       "id": "verifier",
@@ -443,7 +455,7 @@
         "workflows",
         "ui"
       ],
-      "installCount": 55
+      "installCount": 62
     },
     {
       "id": "bmad",
@@ -456,7 +468,7 @@
         "modes",
         "ui"
       ],
-      "installCount": 18
+      "installCount": 19
     },
     {
       "id": "claude-agent-sdk",
@@ -469,7 +481,7 @@
         "providers",
         "agent-loop"
       ],
-      "installCount": 27
+      "installCount": 29
     },
     {
       "id": "auggie-sdk",
@@ -519,7 +531,7 @@
         "providers",
         "agent-loop"
       ],
-      "installCount": 11
+      "installCount": 12
     },
     {
       "id": "checkpoints",
@@ -532,7 +544,7 @@
         "events",
         "ui"
       ],
-      "installCount": 41
+      "installCount": 43
     },
     {
       "id": "codegraph",
@@ -545,7 +557,7 @@
         "tools",
         "search"
       ],
-      "installCount": 82
+      "installCount": 87
     },
     {
       "id": "kanban",
@@ -557,7 +569,7 @@
       "capabilities": [
         "ui"
       ],
-      "installCount": 50
+      "installCount": 52
     },
     {
       "id": "doom",
@@ -569,7 +581,7 @@
       "capabilities": [
         "ui"
       ],
-      "installCount": 9
+      "installCount": 10
     },
     {
       "id": "my-minions",
@@ -582,7 +594,7 @@
         "agents",
         "example"
       ],
-      "installCount": 61
+      "installCount": 68
     },
     {
       "id": "wigolo",
@@ -595,7 +607,7 @@
         "tools",
         "search"
       ],
-      "installCount": 66
+      "installCount": 73
     },
     {
       "id": "destructive-command-guard",
@@ -608,7 +620,7 @@
         "security",
         "commands"
       ],
-      "installCount": 50
+      "installCount": 53
     },
     {
       "id": "git-log",
@@ -620,7 +632,7 @@
       "capabilities": [
         "ui"
       ],
-      "installCount": 54
+      "installCount": 58
     },
     {
       "id": "skill-gallery",
@@ -632,7 +644,7 @@
       "capabilities": [
         "ui"
       ],
-      "installCount": 152
+      "installCount": 166
     },
     {
       "id": "task-scheduler",
@@ -646,7 +658,7 @@
         "commands",
         "events"
       ],
-      "installCount": 29
+      "installCount": 33
     },
     {
       "id": "reasoning-selector",
@@ -658,7 +670,7 @@
       "capabilities": [
         "ui"
       ],
-      "installCount": 130
+      "installCount": 142
     },
     {
       "id": "dbx",
@@ -683,7 +695,7 @@
         "ui",
         "commands"
       ],
-      "installCount": 13
+      "installCount": 16
     }
   ]
 }

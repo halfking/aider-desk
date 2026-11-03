@@ -67,6 +67,9 @@
     "gitBranches": "显示 Git 分支"
   },
   "common": {
+    "autonomyManual": "手动",
+    "autonomyGuided": "引导",
+    "autonomyAutonomous": "自动",
     "settings": "设置",
     "cancel": "取消",
     "save": "保存",
@@ -303,6 +306,21 @@
     "resetZoom": "重置缩放"
   },
   "modelLibrary": {
+    "modalities": {
+      "label": "模态",
+      "input": "输入",
+      "inputTooltip": "模型可以作为输入理解的模态。",
+      "output": "输出",
+      "outputTooltip": "模型可以作为输出生成的模态。",
+      "text": "文本",
+      "image": "图像",
+      "audio": "音频",
+      "video": "视频",
+      "pdf": "PDF",
+      "unknown": "未知模态",
+      "unknownTooltip": "模型能力未知，将跳过附件验证。",
+      "description": "图像输入表示视觉理解，而非图像生成。元数据不可用时，不选择任何模态，并跳过附件验证。修改这些选项会保存模型专属能力；修改其他设置不会覆盖它们。空选项明确表示不支持任何模态。"
+    },
     "enableVoiceControl": "启用语音控制",
     "enableVoiceControlOnlyOneInfo": "为此提供商启用语音控制。一次只能启用一个提供商。",
     "voiceControl": "语音控制",
@@ -381,6 +399,8 @@
     },
     "disableStreaming": "禁用流式传输",
     "disableStreamingInfo": "禁用响应流式传输。当提供商或模型不支持流式传输时使用此选项。",
+    "requireStreaming": "强制流式传输",
+    "requireStreamingInfo": "所有请求（包括后台生成）都必须使用流式传输。适用于拒绝非流式请求的模型。",
     "disableToolCallStreaming": "禁用工具调用流式传输",
     "disableToolCallStreamingInfo": "禁用工具调用输入的流式传输。工具调用仍将执行，但其参数不会逐步显示。",
     "trackTokenUsage": "跟踪 Token 使用量",
@@ -805,6 +825,10 @@
       "commitMessageModel": "提交消息",
       "commitMessageModelTooltip": "用于生成提交消息的模型",
       "inheritModel": "继承",
+      "compactionModel": "压缩模型",
+      "handoffModel": "交接模型",
+      "useCurrentTaskModel": "使用任务当前的模型",
+      "contextModelTooltip": "用于代理模式下手动和自动压缩或交接的模型。每种类型分别保存所选模型。其他模型必须支持对话的上下文大小，且可能无法复用缓存的输入。",
       "defaultWorkingMode": "默认工作模式",
       "defaultWorkingModeTooltip": "新任务的默认工作模式。本地模式直接在项目目录中工作，工作树模式使用隔离的 git 工作树。"
     },
@@ -1244,6 +1268,14 @@
     "saveAllTooltip": "保存所有打开的文件",
     "savedAll": "已保存 {{count}} 个文件",
     "closeTab": "关闭标签页 {{file}}",
+    "copyAbsolutePath": "复制绝对路径",
+    "copyRelativePath": "复制相对路径",
+    "openInExternal": "在外部应用中打开",
+    "pathCopied": "路径已复制到剪贴板",
+    "fileTree": "文件",
+    "showFileTree": "显示文件树",
+    "hideFileTree": "隐藏文件树",
+    "noProjectFiles": "未找到项目文件",
     "discardTitle": "放弃未保存的更改？",
     "discard": "放弃",
     "discardMessage": "未保存的文件更改将丢失。",
@@ -1503,6 +1535,11 @@
     "answer": "回答"
   },
   "toolMessage": {
+    "truncatedResult": {
+      "notice": "工具结果已截断，仅提供预览。",
+      "originalLength": "原始结果：{{length}} 个字符",
+      "unavailable": "无法序列化结果，预览不可用。"
+    },
     "toolLabel": "工具: {{server}}/{{tool}}",
     "arguments": "参数:",
     "executing": "执行工具...",
@@ -1521,7 +1558,7 @@
       "createTask": "创建任务",
       "createSubtask": "创建子任务",
       "deleteTask": "删除任务",
-      "runPrompt": "在任务上运行提示",
+      "runPrompt": "运行任务",
       "searchTask": "搜索任务:",
       "inTask": "在",
       "searchTaskNoMatches": "未找到匹配项。",
@@ -1709,11 +1746,8 @@
     "savePrompt": "保存提示",
     "savePromptDescription": "保存提示而不执行",
     "saveError": "保存提示失败: {{error}}",
-    "autonomyManual": "手动",
     "autonomyManualTooltip": "手动模式：每次工具执行和计划都需要您的明确批准才能继续。适用于不熟悉的代码库或高风险操作。",
-    "autonomyGuided": "引导",
     "autonomyGuidedTooltip": "引导模式：代理在行动前制定计划，并等待您的批准后再执行更改。工具执行自动批准。适用于日常开发。",
-    "autonomyAutonomous": "自动",
     "autonomyAutonomousTooltip": "自主模式：代理不间断地规划和执行，直到任务完成。适用于您想离开的受信任任务。",
     "autonomyLockTooltip": "锁定后，新建任务将保持当前自主模式",
     "placeholders": {

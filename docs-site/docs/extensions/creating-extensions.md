@@ -421,6 +421,33 @@ The following components are available via `props.ui`:
 | `LoadingOverlay` | Loading spinner with message |
 | `ConfirmDialog` | Confirmation dialog modal |
 
+#### ModelSelector catalogs and extension-owned favorites
+
+`ui.ModelSelector` accepts the exported `ModelSelectorProps` contract:
+
+```jsx
+<ui.ModelSelector
+  models={imageModels}
+  providers={imageProviders}
+  selectedModelId={selectedModelId}
+  onChange={handleModelChange}
+  preferredModels={preferredModels}
+  onPreferredModelsChange={handlePreferredModelsChange}
+  popupPlacement="bottom"
+/>
+```
+
+- `models?: Model[]` replaces the core catalog. Only IDs in that array can appear as favorites; `[]` shows no models. Without this prop, unavailable/unknown favorites retain their ordinary core behavior. The supplied array is not mutated.
+- `providers?: ProviderProfile[]` replaces core providers for names and disabled-state lookup. Omit it to use core providers.
+- `selectedModelId?: string | null` uses a provider-qualified ID (`providerId/modelId`); use `null` for an enabled selector with no selection. `undefined` disables the selector button. `onChange(model: Model | null)` receives the selected model, not its ID.
+- `preferredModels?: string[]` is a **controlled** list of provider-qualified IDs. Supplying it, including `[]`, isolates favorites completely from core settings. Selection prepends/deduplicates the selected ID; explicit removal removes that ID. Clearing selection does not change favorites.
+- `onPreferredModelsChange?: (next: string[]) => void` receives the complete next list. The extension must update its state/props and persist the list independently (for example through an extension UI action). Without this callback, supplied favorites are read-only and removal controls are hidden; selection still calls `onChange`. The callback is used only when `preferredModels` is supplied.
+- Out-of-catalog favorite IDs are hidden, not deleted from the controlled list or emitted updates. This allows switching catalogs without losing saved preferences.
+- `skipPreferredModelsUpdate?: boolean` suppresses selection-driven favorite updates in either mode, but not explicit removal. Omit both preference props to retain core favorites and persistence, even when using a custom catalog.
+- Existing optional props remain available: `className`, `popupPlacement` (`"top" | "bottom"`), `labelOnNull` (adds a clearing option), and `usePortal`.
+
+Initialize extension-owned favorites to `[]` while loading persisted data rather than omitting `preferredModels`, so the selector never temporarily uses core favorites.
+
 #### Component Props
 
 **Note:** The `React` object is globally available (not a prop). Access hooks via `React.useState`, `React.useEffect`, etc.
@@ -555,6 +582,40 @@ export default class ProtectedPathsExtension implements Extension {
   }
 }
 ```
+
+### Worktree Lifecycle Hooks
+
+Use a project-local extension at `.aider-desk/extensions/worktree-setup.ts` to run project-specific setup whenever AiderDesk creates a worktree:
+
+```typescript
+import { exec } from 'node:child_process';
+import { promisify } from 'node:util';
+import type { Extension, ExtensionContext, WorktreeCreatedEvent, WorktreeMergedEvent } from '@aiderdesk/extensions';
+
+const execAsync = promisify(exec);
+
+export default class WorktreeSetupExtension implements Extension {
+  static metadata = {
+    name: 'Project Worktree Setup',
+    version: '1.0.0',
+    description: 'Install project dependencies in newly created worktrees',
+  };
+
+  async onWorktreeCreated(event: WorktreeCreatedEvent, context: ExtensionContext): Promise<void> {
+    const { stdout, stderr } = await execAsync('npm ci', { cwd: event.worktree.path });
+    context.log([stdout, stderr].filter(Boolean).join('\n'), 'info');
+  }
+
+  async onWorktreeMerged(event: WorktreeMergedEvent, context: ExtensionContext): Promise<void> {
+    context.log(`Merged ${event.worktree.path} into ${event.targetBranch ?? event.targetPath}`, 'info');
+  }
+}
+```
+
+- **`onWorktreeCreated`** receives `{ task, worktree }`. It is awaited after worktree creation, symlink setup, and the existing `worktreePostCreateCommand` (if configured). It also covers switching an existing task to a newly created worktree. Loading or sharing an existing worktree does not trigger it. The task may not yet be fully initialized, so use `event.worktree.path` rather than relying on task readiness or its current working mode.
+- **`onWorktreeMerged`** receives `{ task, worktree, targetPath, targetBranch?, squash, includeUncommitted }`. It is awaited after successful merge-to-project, merge-before-switch-to-local, and worktree-to-worktree operations, before source cleanup. Failed merges do not trigger it. `worktree` describes the source; `targetPath` identifies the destination repository. `targetBranch` is supplied for merges to a project branch, and omitted for worktree-to-worktree merges. For checkoutless merges, the target branch is updated without checking it out in `targetPath`; do not assume that directory has the merged files checked out. `includeUncommitted` records whether the operation includes uncommitted changes, not whether any were present.
+
+Both hooks are post-operation notifications returning `Promise<void>`; they cannot cancel or alter the completed Git operation. Handler failures are logged and other extensions continue. The existing `worktreePostCreateCommand` remains supported; clear it when moving the same setup into an extension to avoid running it twice. Project-local extensions only receive events for their own project. Only run commands you trust; these hooks execute without agent tool approval.
 
 ### Extension with Memory Integration
 

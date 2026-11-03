@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
+import { cloneDeep } from 'lodash';
 import { createToolRecoveryNotice, isToolRecoveryNotice, ToolRecoveryCode, DEFAULT_TOOL_RECOVERY_MODES } from '@common/tool-recovery';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -54,6 +55,7 @@ import {
 } from '@common/tools';
 import { EXTENSION_ORIGIN } from '@common/extensions';
 
+import { generateOnce } from './generate-once';
 import { createPowerToolset } from './tools/power';
 import { createTodoToolset } from './tools/todo';
 import { createSearchParentTaskTool, createTasksToolset } from './tools/tasks';
@@ -76,7 +78,7 @@ import {
 import { extractReasoningMiddleware } from './middlewares/extract-reasoning-middleware';
 import { CompactionLevel, generateCompactedSummary, getReloadableMessages, getSubagentOldResultIds, smartCompactMessages } from './compaction';
 
-import type { ExtensionToolOrigin, ToolsetToolEntry } from '@common/extensions';
+import type { ContextGenerationOptions, ContextGenerationResult, ExtensionToolOrigin, ToolsetToolEntry } from '@common/extensions';
 import type { TextPart } from '@ai-sdk/provider-utils';
 import type { z } from 'zod';
 import type { LanguageModelV4 } from '@ai-sdk/provider';
@@ -87,7 +89,7 @@ import { AIDER_DESK_PROJECT_RULES_DIR } from '@/constants';
 import { Task } from '@/task';
 import { Store } from '@/store';
 import logger from '@/logger';
-import { prepareMessagesForModel } from '@/agent/message-preparation';
+import { prepareMessagesForModel, type PreparedMessagesOptions } from '@/agent/message-preparation';
 import { ModelManager } from '@/models/model-manager';
 import { TelemetryManager } from '@/telemetry/telemetry-manager';
 import { ResponseMessage } from '@/messages';
@@ -202,7 +204,7 @@ export class Agent {
         imageParts.push({
           type: 'file',
           data: file!.imageBase64,
-          mediaType: 'image',
+          mediaType: file!.mimeType ?? 'image',
         });
       } else if (!file!.isImage && file!.content) {
         // Add to textFileContents array
@@ -334,7 +336,7 @@ export class Agent {
                 imageParts.push({
                   type: 'file',
                   data: imageBase64,
-                  mediaType: 'image',
+                  mediaType: detected.mime,
                 });
                 continue;
               }
@@ -1093,36 +1095,39 @@ export class Agent {
         // Attempt generic repair for other types of errors
         try {
           logger.warn(`Attempting generic repair for tool call error: ${toolCall.toolName}`);
-          const result = await generateText({
-            model,
-            system,
-            messages: [
-              ...messages,
-              {
-                role: 'assistant',
-                parts: [
-                  {
-                    type: 'tool-call',
-                    toolCallId: toolCall.toolCallId,
-                    toolName: toolCall.toolName,
-                    input: JSON.stringify(toolCall.input),
-                  },
-                ],
-              },
-              {
-                role: 'tool' as const,
-                parts: [
-                  {
-                    type: 'tool-result',
-                    toolCallId: toolCall.toolCallId,
-                    toolName: toolCall.toolName,
-                    result: error.message,
-                  },
-                ],
-              },
-            ],
-            tools,
-          });
+          const result = await generateOnce(
+            {
+              model,
+              system,
+              messages: [
+                ...messages,
+                {
+                  role: 'assistant',
+                  parts: [
+                    {
+                      type: 'tool-call',
+                      toolCallId: toolCall.toolCallId,
+                      toolName: toolCall.toolName,
+                      input: JSON.stringify(toolCall.input),
+                    },
+                  ],
+                },
+                {
+                  role: 'tool' as const,
+                  parts: [
+                    {
+                      type: 'tool-result',
+                      toolCallId: toolCall.toolCallId,
+                      toolName: toolCall.toolName,
+                      result: error.message,
+                    },
+                  ],
+                },
+              ],
+              tools,
+            },
+            this.modelManager.isStreamingRequired(provider, profile.model),
+          );
 
           logger.debug('Repair tool call result:', result);
           const newToolCall = result.toolCalls.find((newToolCall) => newToolCall.toolName === toolCall.toolName);
@@ -1152,6 +1157,8 @@ export class Agent {
         ...providerParameters,
       });
 
+      let allowAttachmentWarnings = true;
+
       const getBaseModelCallParams = async () => {
         const optimizedMessages = await prepareMessagesForModel(
           messages,
@@ -1161,7 +1168,9 @@ export class Agent {
           projectProfiles,
           initialUserRequestMessageIndex,
           this.extensionManager,
+          this.getAttachmentFilterOptions(provider.id, modelName, allowAttachmentWarnings),
         );
+        allowAttachmentWarnings = false;
 
         return {
           providerOptions,
@@ -1907,6 +1916,104 @@ export class Agent {
     return messages;
   }
 
+  async generateTextFromContext(task: Task, prompt: string, options?: ContextGenerationOptions): Promise<ContextGenerationResult<string>> {
+    const result = await this.generateFromContext(task, prompt, undefined, options);
+    return { output: result.text, usage: result.usage, providerMetadata: result.providerMetadata, finishReason: result.finishReason };
+  }
+
+  async generateObjectFromContext<T>(
+    task: Task,
+    prompt: string,
+    schema: z.ZodType<T>,
+    options?: ContextGenerationOptions,
+  ): Promise<ContextGenerationResult<T>> {
+    const result = await this.generateFromContext(task, prompt, schema, options);
+    return { output: result.output as T, usage: result.usage, providerMetadata: result.providerMetadata, finishReason: result.finishReason };
+  }
+
+  private async generateFromContext<T>(task: Task, prompt: string, schema?: z.ZodType<T>, options: ContextGenerationOptions = {}) {
+    const profile = await task.getTaskAgentProfile();
+    if (!profile) {
+      throw new Error('No agent profile selected for this task');
+    }
+    const provider = this.modelManager.getProviders().find((entry) => entry.id === profile.provider);
+    if (!provider) {
+      throw new Error(`Provider ${profile.provider} not found`);
+    }
+    options.abortSignal?.throwIfAborted();
+    const settings = this.store.getSettings();
+    const contextMessages = cloneDeep(await task.getContextMessages());
+    const contextFiles = cloneDeep(await task.getContextFiles());
+    const systemPrompt = await this.promptsManager.getSystemPrompt(settings, task, profile);
+    const messages = await this.prepareMessages(task, profile, contextMessages, contextFiles);
+    const firstUserMessage = contextMessages[0];
+    const userIndex = firstUserMessage
+      ? messages.findIndex((message) => message.role === 'user' && message.content === firstUserMessage.content)
+      : messages.length;
+    messages.push({ role: 'user', content: prompt });
+    const toolSet = await this.getAvailableTools(
+      task,
+      task.task.currentMode || this.store.getProjectSettings(task.project.baseDir).currentMode || 'agent',
+      profile,
+      provider,
+      profile.model,
+      contextMessages,
+      [],
+      options.abortSignal,
+    );
+    const tools: ToolSet = Object.fromEntries(Object.entries(toolSet).map(([name, tool]) => [name, { ...tool, execute: undefined }]));
+    const model = await this.modelManager.createLlm(
+      provider,
+      profile.model,
+      settings,
+      task.getProjectDir(),
+      tools,
+      systemPrompt,
+      undefined,
+      uuidv4(),
+      async () => [false, 'Tools cannot execute during context generation'],
+    );
+    const modelSettings = this.modelManager.getModelSettings(provider.id, profile.model);
+    const preparedMessages = await prepareMessagesForModel(
+      messages,
+      this.modelManager.getCacheControl(provider, profile.model),
+      task,
+      profile,
+      this.agentProfileManager.getProjectProfiles(task.project),
+      userIndex,
+      this.extensionManager,
+      this.getAttachmentFilterOptions(provider.id, profile.model, true),
+    );
+    const result = await generateOnce(
+      {
+        ...this.modelManager.getProviderParameters(provider, profile.model),
+        model: wrapLanguageModel({ model: model as LanguageModelV4, middleware: extractReasoningMiddleware({ tagName: 'think' }) }),
+        instructions: systemPrompt,
+        messages: preparedMessages,
+        tools,
+        toolChoice: 'none',
+        output: schema ? Output.object({ schema }) : undefined,
+        providerOptions: this.modelManager.getProviderOptions(provider, profile.model),
+        temperature: profile.temperature ?? modelSettings?.temperature,
+        maxOutputTokens: options.maxOutputTokens ?? profile.maxTokens ?? modelSettings?.maxOutputTokens,
+        maxRetries: MAX_RETRIES,
+        abortSignal: options.abortSignal,
+        telemetry: this.getTelemetrySettings(),
+      },
+      this.modelManager.isStreamingRequired(provider, profile.model),
+    );
+    if (result.toolCalls.length > 0) {
+      throw new Error('Context generation returned a tool call despite toolChoice none');
+    }
+    return {
+      text: result.text,
+      output: schema ? result.output : undefined,
+      usage: result.usage,
+      providerMetadata: result.providerMetadata,
+      finishReason: result.finishReason,
+    };
+  }
+
   async generateText(
     modelId: string,
     systemPrompt: string,
@@ -1952,15 +2059,27 @@ export class Agent {
     });
 
     try {
-      const result = await generateText({
-        model,
-        instructions: systemPrompt,
-        messages: await prepareMessagesForModel(messages as ModelMessage[], cacheControl),
-        abortSignal: effectiveAbortSignal,
-        providerOptions,
-        ...providerParameters,
-        telemetry: this.getTelemetrySettings(),
-      });
+      const result = await generateOnce(
+        {
+          model,
+          instructions: systemPrompt,
+          messages: await prepareMessagesForModel(
+            messages as ModelMessage[],
+            cacheControl,
+            null,
+            null,
+            [],
+            -1,
+            this.extensionManager,
+            this.getAttachmentFilterOptions(provider.id, modelName, true),
+          ),
+          abortSignal: effectiveAbortSignal,
+          providerOptions,
+          ...providerParameters,
+          telemetry: this.getTelemetrySettings(),
+        },
+        this.modelManager.isStreamingRequired(provider, modelName),
+      );
 
       return result.text;
     } catch (error) {
@@ -2024,16 +2143,28 @@ export class Agent {
     });
 
     try {
-      const result = await generateText({
-        model,
-        output: Output.object({ schema }),
-        instructions: systemPrompt,
-        messages: await prepareMessagesForModel(messages as ModelMessage[], cacheControl),
-        abortSignal: effectiveAbortSignal,
-        providerOptions,
-        ...providerParameters,
-        telemetry: this.getTelemetrySettings(),
-      });
+      const result = await generateOnce(
+        {
+          model,
+          output: Output.object({ schema }),
+          instructions: systemPrompt,
+          messages: await prepareMessagesForModel(
+            messages as ModelMessage[],
+            cacheControl,
+            null,
+            null,
+            [],
+            -1,
+            this.extensionManager,
+            this.getAttachmentFilterOptions(provider.id, modelName, true),
+          ),
+          abortSignal: effectiveAbortSignal,
+          providerOptions,
+          ...providerParameters,
+          telemetry: this.getTelemetrySettings(),
+        },
+        this.modelManager.isStreamingRequired(provider, modelName),
+      );
 
       return result.output as T;
     } catch (error) {
@@ -2049,6 +2180,15 @@ export class Agent {
         this.abortControllers.delete(controllerId);
       }
     }
+  }
+
+  private getAttachmentFilterOptions(providerId: string, modelName: string, allowWarnings: boolean): PreparedMessagesOptions {
+    return {
+      providerId,
+      modelName,
+      allowWarnings,
+      resolveModalities: (resolvedProviderId: string, resolvedModelName: string) => this.modelManager.getModelModalities(resolvedProviderId, resolvedModelName),
+    };
   }
 
   async estimateTokens(task: Task, profile: AgentProfile): Promise<number> {
@@ -2076,6 +2216,8 @@ export class Agent {
         profile,
         this.agentProfileManager.getProjectProfiles(task.project),
         userRequestMessageIndex,
+        undefined,
+        this.getAttachmentFilterOptions(provider.id, profile.model, false),
       );
 
       // Format tools for the prompt

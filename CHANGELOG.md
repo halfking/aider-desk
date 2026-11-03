@@ -1,6 +1,23 @@
 # Changelog
 
-## [UNRELEASED]
+## [0.90.0]
+
+- updated Electron, Node.js, and uv for security fixes, added automatic Python certificate bundle updates and warnings for unpatched Node.js versions
+- fixed duplicate prompt execution when mobile clients replayed requests after reconnecting
+- added separate model overrides for conversation compaction and handoff in Context Management settings
+- added file tree sidebar, tab context menus, and editor state persistence to the file editor modal
+- added extension hooks for worktree creation and merging to support project-specific automation
+- improved Task tools with support for starting and resuming prepared tasks, explicit execution and autonomy controls, and task names in tool messages
+- fixed grouping and spacing of tool-only messages in Compact message view
+- added required streaming settings for providers and individual models
+- added extension APIs for background generation from task context
+- added custom model catalogs and independent favorites for extension model selectors
+- added editable model input and output modalities with attachment filtering for known capabilities while preserving attachments for unknown models
+- fixed missing `onPromptFinished` extension hook after agent resume and restart recovery
+- fixed context image attachments emitting a generic image media type instead of the detected MIME type, which could fail model requests for less common formats
+- prevented OS command injection in extension repository clone path
+
+## [0.89.0]
 
 - improved Mermaid diagrams with theme-aware colors and fonts and smoother streaming using Pele library
 - added support for pushing worktree fixes to the base branch’s upstream from the Push dialog
@@ -12,6 +29,7 @@
 - fixed notification overflow and centering on small screens
 - fixed dialog overflow on small screens with responsive widths and wrapping footer buttons
 - fixed Model Library layout on small screens with a wrapping toolbar and a horizontally scrollable models table
+- fixed crashes when displaying truncated tool results while preserving tool details and input parameters
 
 ## [0.88.0]
 

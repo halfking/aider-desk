@@ -42,10 +42,39 @@ import {
   UsageReportData,
   VoiceSession,
   UncommittedFiles,
+  Worktree,
 } from '@common/types';
 
 export { AutonomyMode, ContextMemoryMode, InvocationMode, OS, ToolApprovalState, ToolRecoveryMode };
 export type { ModelCallSettings, ModelCallTimeout, Reasoning, SwitchToLocalOptions, SwitchToWorktreeOptions, UncommittedFiles };
+
+export interface ContextGenerationOptions {
+  abortSignal?: AbortSignal;
+  maxOutputTokens?: number;
+}
+
+export interface ContextGenerationUsage {
+  inputTokens: number | undefined;
+  outputTokens: number | undefined;
+  totalTokens: number | undefined;
+  inputTokenDetails: {
+    noCacheTokens: number | undefined;
+    cacheReadTokens: number | undefined;
+    cacheWriteTokens: number | undefined;
+  };
+  outputTokenDetails: {
+    textTokens: number | undefined;
+    reasoningTokens: number | undefined;
+  };
+  raw?: unknown;
+}
+
+export interface ContextGenerationResult<T> {
+  output: T;
+  usage: ContextGenerationUsage;
+  providerMetadata?: unknown;
+  finishReason: string;
+}
 
 export type AgentStepResult = unknown;
 export type { ModeDefinition };
@@ -302,6 +331,26 @@ export interface MessageFilter {
  */
 export type UIComponent = object;
 
+/** Props accepted by the extension-exposed ui.ModelSelector wrapper. */
+export interface ModelSelectorProps {
+  className?: string;
+  selectedModelId?: string | null;
+  onChange: (model: Model | null) => void;
+  /** Overrides the core catalog, including favorites. An empty array allows no models. */
+  models?: Model[];
+  /** Overrides provider labels and disabled state; defaults to core providers. */
+  providers?: ProviderProfile[];
+  /** Controlled provider-qualified IDs. When supplied (even empty), core favorites are never changed. */
+  preferredModels?: string[];
+  /** Receives the next complete controlled list; the extension must update its props and persist it. */
+  onPreferredModelsChange?: (preferredModels: string[]) => void;
+  popupPlacement?: 'top' | 'bottom';
+  labelOnNull?: string;
+  /** Suppresses selection-driven favorite updates, not explicit removal. */
+  skipPreferredModelsUpdate?: boolean;
+  usePortal?: boolean;
+}
+
 /**
  * Common UI components available to extension JSX components
  */
@@ -317,6 +366,7 @@ export interface UIComponents {
   Slider: UIComponent;
   DatePicker: UIComponent;
   Chip: UIComponent;
+  /** Accepts ModelSelectorProps at runtime. */
   ModelSelector: UIComponent;
   Tooltip: UIComponent;
   LoadingOverlay: UIComponent;
@@ -402,6 +452,20 @@ export interface TaskPreparedEvent {
 /** Event payload for task initialization events */
 export interface TaskInitializedEvent {
   readonly task: TaskData;
+}
+
+export interface WorktreeCreatedEvent {
+  readonly task: TaskData;
+  readonly worktree: Worktree;
+}
+
+export interface WorktreeMergedEvent {
+  readonly task: TaskData;
+  readonly worktree: Worktree;
+  readonly targetPath: string;
+  readonly targetBranch?: string;
+  readonly squash: boolean;
+  readonly includeUncommitted: boolean;
 }
 
 /** Event payload for task closed events */
@@ -498,7 +562,7 @@ export interface AgentStepFinishedEvent {
   readonly agentProfile: AgentProfile;
   readonly currentResponseId: string;
   readonly stepResult: AgentStepResult;
-  finishReason: 'stop' | 'length' | 'content-filter' | 'tool-calls' | 'error' | 'other';
+  finishReason: 'stop' | 'length' | 'content-filter' | 'tool-calls' | 'error' | 'other' | 'interrupted';
   responseMessages: ContextMessage[];
 }
 
@@ -1131,6 +1195,16 @@ export interface TaskContext {
    * @returns The generated object matching the schema, or undefined if generation failed
    */
   generateObject<T = unknown>(modelId: string, systemPrompt: string, prompt: string, schema: z.ZodType<T>): Promise<T | undefined>;
+
+  /**
+   * Generate one response from a snapshot of the task's current prepared context and selected agent profile.
+   * Retains tool definitions with toolChoice none; never executes tools or persists the generated messages.
+   * Does not reproduce transient overrides from an earlier agent execution. Cache reuse is provider-dependent.
+   */
+  generateTextFromContext(prompt: string, options?: ContextGenerationOptions): Promise<ContextGenerationResult<string>>;
+
+  /** Generate structured output from task context with the same read-only semantics as generateTextFromContext. */
+  generateObjectFromContext<T>(prompt: string, schema: z.ZodType<T>, options?: ContextGenerationOptions): Promise<ContextGenerationResult<T>>;
 
   // User Interaction
 
@@ -2038,6 +2112,14 @@ export interface Extension {
    * @returns void or partial event to block deletion
    */
   onTaskDeleted?(event: TaskDeletedEvent, context: ExtensionContext): Promise<void | Partial<TaskDeletedEvent>>;
+
+  // Worktree Events
+
+  /** Called after a new worktree, symlinks, and the configured post-create command are ready. Not called for reused worktrees. */
+  onWorktreeCreated?(event: WorktreeCreatedEvent, context: ExtensionContext): Promise<void>;
+
+  /** Called after a successful merge, before source worktree cleanup. targetBranch is provided for merges to a project branch. */
+  onWorktreeMerged?(event: WorktreeMergedEvent, context: ExtensionContext): Promise<void>;
 
   // Project Events
 

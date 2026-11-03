@@ -67,6 +67,9 @@
     "gitBranches": "Show Git Branches"
   },
   "common": {
+    "autonomyManual": "Manual",
+    "autonomyGuided": "Guided",
+    "autonomyAutonomous": "Auto",
     "settings": "Settings",
     "cancel": "Cancel",
     "save": "Save",
@@ -304,6 +307,21 @@
     "resetZoom": "Reset zoom"
   },
   "modelLibrary": {
+    "modalities": {
+      "label": "Modalities",
+      "input": "Input",
+      "inputTooltip": "Modalities the model can understand as input.",
+      "output": "Output",
+      "outputTooltip": "Modalities the model can generate as output.",
+      "text": "Text",
+      "image": "Image",
+      "audio": "Audio",
+      "video": "Video",
+      "pdf": "PDF",
+      "unknown": "Unknown modalities",
+      "unknownTooltip": "Model capabilities are unknown. Attachment validation is skipped.",
+      "description": "Image input means vision, not image generation. When metadata is unavailable, no modalities are selected and attachment validation is skipped. Editing these selections saves model-specific capabilities; unrelated settings do not override them. Empty selections explicitly declare no supported modalities."
+    },
     "enableVoiceControl": "Enable Voice Control",
     "enableVoiceControlOnlyOneInfo": "Only one provider can be enabled at a time.",
     "voiceControl": "Voice control",
@@ -382,6 +400,8 @@
     },
     "disableStreaming": "Disable streaming",
     "disableStreamingInfo": "Disables response streaming. Use this when the provider or model does not support streaming responses.",
+    "requireStreaming": "Require streaming",
+    "requireStreamingInfo": "Requires streaming for all requests, including background generation. Use this for models that reject non-streaming requests.",
     "disableToolCallStreaming": "Disable tool call streaming",
     "disableToolCallStreamingInfo": "Disables streaming of tool call input. Tool calls will still execute but their arguments won't be shown progressively.",
     "trackTokenUsage": "Track token usage",
@@ -806,6 +826,10 @@
       "commitMessageModel": "Commit Message",
       "commitMessageModelTooltip": "Model used for generating commit messages",
       "inheritModel": "Inherit",
+      "compactionModel": "Compaction model",
+      "handoffModel": "Handoff model",
+      "useCurrentTaskModel": "Use task’s current model",
+      "contextModelTooltip": "Model used for manual and automatic compaction or handoff in Agent mode. Each type keeps its own selection. A different model must support the conversation’s context size and may not reuse cached input.",
       "defaultWorkingMode": "Default Working Mode",
       "defaultWorkingModeTooltip": "The default working mode for new tasks. Local works directly in the project directory, Worktree uses an isolated git worktree."
     },
@@ -1311,6 +1335,14 @@
     "saveAllTooltip": "Save all open files",
     "savedAll": "Saved {{count}} files",
     "closeTab": "Close tab {{file}}",
+    "copyAbsolutePath": "Copy absolute path",
+    "copyRelativePath": "Copy relative path",
+    "openInExternal": "Open in external application",
+    "pathCopied": "Path copied to clipboard",
+    "fileTree": "Files",
+    "showFileTree": "Show file tree",
+    "hideFileTree": "Hide file tree",
+    "noProjectFiles": "No project files found",
     "discardTitle": "Discard unsaved changes?",
     "discard": "Discard",
     "discardMessage": "Your unsaved file changes will be lost.",
@@ -1549,6 +1581,11 @@
     "answer": "ANSWER"
   },
   "toolMessage": {
+    "truncatedResult": {
+      "notice": "Tool result truncated. Only a preview is available.",
+      "originalLength": "Original result: {{length}} characters",
+      "unavailable": "The result could not be serialized; no preview is available."
+    },
     "toolLabel": "{{server}}: {{tool}}",
     "arguments": "Arguments:",
     "executing": "Executing tool...",
@@ -1567,7 +1604,7 @@
       "createTask": "Create task",
       "createSubtask": "Create subtask",
       "deleteTask": "Delete task",
-      "runPrompt": "Run prompt on task",
+      "runPrompt": "Run task",
       "searchTask": "Search task:",
       "inTask": "in",
       "searchTaskNoMatches": "No matches found.",
@@ -1758,11 +1795,8 @@
     "savePrompt": "Save Prompt",
     "savePromptDescription": "Save prompt without executing",
     "saveError": "Failed to save prompt: {{error}}",
-    "autonomyManual": "Manual",
     "autonomyManualTooltip": "Manual mode: Every tool execution and plan requires your explicit approval before proceeding. Best for unfamiliar codebases or risky operations.",
-    "autonomyGuided": "Guided",
     "autonomyGuidedTooltip": "Guided mode: The agent plans before acting and waits for your approval before executing changes. Tool executions are auto-approved. Best for everyday development.",
-    "autonomyAutonomous": "Auto",
     "autonomyAutonomousTooltip": "Autonomous mode: The agent plans and executes without interruption until the task is complete. Best for trusted tasks where you want to step away.",
     "autonomyLockTooltip": "Locking keeps the current autonomy mode for newly created tasks",
     "placeholders": {

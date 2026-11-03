@@ -67,13 +67,7 @@ import {
   parseSkillCommand,
   parseUsageReport,
 } from '@common/utils';
-import {
-  COMPACT_CONVERSATION_AGENT_PROFILE,
-  CONFLICT_RESOLUTION_PROFILE,
-  HANDOFF_AGENT_PROFILE,
-  INIT_PROJECT_AGENTS_PROFILE,
-  getSubagentId,
-} from '@common/agent';
+import { COMPACT_CONVERSATION_AGENT_PROFILE, CONFLICT_RESOLUTION_PROFILE, INIT_PROJECT_AGENTS_PROFILE, getSubagentId } from '@common/agent';
 import {
   POWER_TOOL_BASH,
   POWER_TOOL_GROUP_NAME,
@@ -92,7 +86,7 @@ import type { ToolContent, JSONValue } from '@common/types';
 import type { RegisteredCommand } from '@/extensions/extension-manager';
 import type { WatchHandle } from '@/file-watcher-manager';
 import type { SmartCompactionPassSelection } from '@/agent/smart-compaction';
-import type { SmartCompactionOptions } from '@common/extensions';
+import type { ContextGenerationOptions, ContextGenerationResult, SmartCompactionOptions } from '@common/extensions';
 
 import { translate } from '@/utils/i18n';
 import { ExtensionEventMap, ExtensionManager } from '@/extensions/extension-manager';
@@ -2938,7 +2932,8 @@ export class Task {
         this.addLogMessage('error', translate(this.store.getSettings().language, 'durability.missingProfile'));
         return;
       }
-      await this.runPromptInAgent(profile, execution.mode, null, execution.promptContext);
+      const responses = await this.runPromptInAgent(profile, execution.mode, null, execution.promptContext);
+      await this.extensionManager.dispatchEvent('onPromptFinished', { responses }, this.project, this);
     }
   }
 
@@ -3385,9 +3380,11 @@ export class Task {
     const originalText = extractTextContent(originalUserMessage.content);
     const promptToRun = updatedPrompt ?? originalText;
     const imagesToRun = updatedImages ?? (updatedPrompt !== undefined ? undefined : extractImagesFromContent(originalUserMessage.content));
-    if (this.tryCustomCommand(promptToRun, mode)) {
+    const customCommand = this.tryCustomCommand(promptToRun, mode);
+    if (customCommand) {
       this.sendTaskMessageRemoved(removedMessages.map((msg) => msg.id));
       await this.updateContextInfo();
+      await customCommand;
       return;
     }
 
@@ -3400,35 +3397,33 @@ export class Task {
 
       await this.updateContextInfo();
 
-      // No need to await runPrompt here, let it run in the background
-      void this.runPrompt(promptToRun, mode, false, originalUserMessage.id, true, imagesToRun);
+      await this.runPrompt(promptToRun, mode, false, originalUserMessage.id, true, imagesToRun);
     } else {
       logger.warn('Could not find a previous user message to redo or an updated prompt to run.');
     }
   }
 
-  public async resumeTask() {
+  public async resumeTask(mode: Mode = this.getCurrentMode()) {
     logger.info('Resuming task:', {
       baseDir: this.project.baseDir,
       taskId: this.taskId,
     });
 
-    const mode = this.getCurrentMode();
     const contextMessages = await this.contextManager.getContextMessages();
     const lastMessage = contextMessages[contextMessages.length - 1];
 
-    if (lastMessage?.role === MessageRole.User && this.tryCustomCommand(extractTextContent(lastMessage.content), mode)) {
+    const customCommand = lastMessage?.role === MessageRole.User ? this.tryCustomCommand(extractTextContent(lastMessage.content), mode) : undefined;
+    if (customCommand) {
       const removedMessageIds = this.contextManager.removeMessageById(lastMessage.id);
       this.sendTaskMessageRemoved(removedMessageIds);
+      await customCommand;
       return;
     }
 
     if (!AIDER_MODES.includes(mode)) {
       const profile = await this.getTaskAgentProfile();
       if (!profile) {
-        logger.error('No active Agent profile found for resume');
-        this.addLogMessage('error', 'No active Agent profile found');
-        return;
+        throw new Error('No active Agent profile found for resume');
       }
 
       if (!this.task.agentProfileId) {
@@ -3439,41 +3434,41 @@ export class Task {
       this.addLogMessage('loading', 'Resuming task...');
 
       const execution = this.durabilityManager.getRecoverableRoots()[0];
-      void this.runPromptInAgent(profile, mode, null, execution?.promptContext);
+      const responses = await this.runPromptInAgent(profile, mode, null, execution?.promptContext);
+      await this.extensionManager.dispatchEvent('onPromptFinished', { responses }, this.project, this);
     } else {
       // In other modes, check if last message is user
       if (lastMessage && lastMessage.role === MessageRole.User) {
         // Last message is from user, redo it
         logger.info('Last message is from user, redoing prompt');
         this.addLogMessage('loading', 'Resuming task...');
-        void this.redoUserPrompt(lastMessage.id, mode);
+        await this.redoUserPrompt(lastMessage.id, mode);
       } else {
         // Last message is not from user, send "Continue" to aider
         logger.info('Last message is not from user, sending Continue prompt');
-        void this.runPrompt('Continue', mode, false);
+        await this.runPrompt('Continue', mode, false);
       }
     }
   }
 
-  private tryCustomCommand(prompt: string, mode: Mode): boolean {
+  private tryCustomCommand(prompt: string, mode: Mode): Promise<void> | undefined {
     if (!prompt.startsWith('/')) {
-      return false;
+      return undefined;
     }
 
     const [name, ...args] = parseCommandArgs(prompt.slice(1));
     if (!name) {
-      return false;
+      return undefined;
     }
 
     const isExtensionCommand = this.extensionManager.getCommands(this.project).some(({ command }) => command.name === name);
     const isCustomCommand = !!this.customCommandManager.getCommand(name);
     if (!isExtensionCommand && !isCustomCommand) {
-      return false;
+      return undefined;
     }
 
     logger.info('Executing custom command from user prompt', { name, args });
-    void this.runCustomCommand(name, args, mode);
-    return true;
+    return this.runCustomCommand(name, args, mode);
   }
 
   private getCurrentMode() {
@@ -3665,10 +3660,12 @@ export class Task {
           throw new Error('No active Agent profile found');
         }
 
+        const modelId = this.getAuxiliaryModelId(profile, this.store.getSettings().taskSettings.compactionModel);
+        const [provider, model] = extractProviderModel(modelId);
         const compactConversationAgentProfile: AgentProfile = {
           ...COMPACT_CONVERSATION_AGENT_PROFILE,
-          provider: profile.provider,
-          model: profile.model,
+          provider,
+          model,
         };
 
         if (waitForAgentCompletion) {
@@ -3792,17 +3789,13 @@ export class Task {
           throw new Error('No active Agent profile found');
         }
 
-        const handoffAgentProfile: AgentProfile = {
-          ...HANDOFF_AGENT_PROFILE,
-          provider: profile.provider,
-          model: profile.model,
-        };
+        const modelId = this.getAuxiliaryModelId(profile, this.store.getSettings().taskSettings.handoffModel);
 
         if (waitForAgentCompletion) {
           await this.waitForCurrentAgentToFinish();
         }
         generatedPrompt = await this.agent.generateText(
-          `${handoffAgentProfile.provider}/${handoffAgentProfile.model}`,
+          modelId,
           '',
           handoffPrompt,
           this.getProjectDir(),
@@ -3856,7 +3849,7 @@ export class Task {
     await newTask.addFiles(...contextFiles);
 
     if (execute) {
-      await newTask.resumeTask();
+      void newTask.resumeTask();
     }
 
     // Send task-created event to trigger activation and handoff
@@ -4443,6 +4436,8 @@ ${error.stderr}`,
     if (postCreateCommand) {
       await this.runWorktreePostCreateCommand(postCreateCommand);
     }
+
+    await this.extensionManager.dispatchEvent('onWorktreeCreated', { task: this.task, worktree: { ...this.task.worktree } }, this.project, this);
   }
 
   private async runWorktreePostCreateCommand(command: string): Promise<void> {
@@ -4599,6 +4594,20 @@ ${error.stderr}`,
       // Store merge state for potential revert
       await this.saveTask({ lastMergeState: mergeState });
 
+      await this.extensionManager.dispatchEvent(
+        'onWorktreeMerged',
+        {
+          task: this.task,
+          worktree: { ...this.task.worktree },
+          targetPath: this.project.baseDir,
+          targetBranch: effectiveTargetBranch,
+          squash,
+          includeUncommitted: true,
+        },
+        this.project,
+        this,
+      );
+
       this.addLogMessage(
         'info',
         squash
@@ -4688,6 +4697,20 @@ ${error.stderr}`,
         );
 
         await this.saveTask({ lastMergeState: mergeState });
+
+        await this.extensionManager.dispatchEvent(
+          'onWorktreeMerged',
+          {
+            task: this.task,
+            worktree: { ...this.task.worktree },
+            targetPath: this.project.baseDir,
+            targetBranch: effectiveTargetBranch,
+            squash: false,
+            includeUncommitted: true,
+          },
+          this.project,
+          this,
+        );
 
         this.addLogMessage('info', `Successfully merged worktree to ${effectiveTargetBranch} branch`, true);
       } catch (error) {
@@ -4923,6 +4946,19 @@ ${error.stderr}`,
     await this.waitForCurrentPromptToFinish();
 
     await this.gitManager.mergeWorktreeToWorktree(this.task.worktree.path, targetWorktreeDir, includeUncommitted);
+
+    await this.extensionManager.dispatchEvent(
+      'onWorktreeMerged',
+      {
+        task: this.task,
+        worktree: { ...this.task.worktree },
+        targetPath: targetWorktreeDir,
+        squash: false,
+        includeUncommitted,
+      },
+      this.project,
+      this,
+    );
 
     await this.sendUpdatedFilesUpdated();
   }
@@ -5773,6 +5809,14 @@ ${error.stderr}`,
 
   public async generateObject<T>(modelId: string, systemPrompt: string, prompt: string, schema: z.ZodType<T>): Promise<T | undefined> {
     return this.agent.generateObject(modelId, systemPrompt, prompt, schema, this.getProjectDir(), [], true, undefined, this.task.id);
+  }
+
+  public async generateTextFromContext(prompt: string, options?: ContextGenerationOptions): Promise<ContextGenerationResult<string>> {
+    return this.agent.generateTextFromContext(this, prompt, options);
+  }
+
+  public async generateObjectFromContext<T>(prompt: string, schema: z.ZodType<T>, options?: ContextGenerationOptions): Promise<ContextGenerationResult<T>> {
+    return this.agent.generateObjectFromContext(this, prompt, schema, options);
   }
 
   async runCodeChangeRequests(requests: ChangeRequestItem[], contextSize: number = 5, createNewTask?: boolean): Promise<void> {
