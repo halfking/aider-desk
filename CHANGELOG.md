@@ -1,5 +1,12 @@
 # Changelog
 
+## [UNRELEASED]
+
+- fixed OS command injection via commit messages and file paths in git operations
+- fixed terminal startup cleanup and retries, cancelling abandoned initialization and waiting for the fitted emulator before creating its shell session
+- added Italian locale
+- safely render non-JSON subagent tool results
+
 ## [0.90.0]
 
 - updated Electron, Node.js, and uv for security fixes, added automatic Python certificate bundle updates and warnings for unpatched Node.js versions

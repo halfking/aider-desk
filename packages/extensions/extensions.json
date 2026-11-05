@@ -35,7 +35,7 @@
         "tools",
         "ui"
       ],
-      "installCount": 42
+      "installCount": 43
     },
     {
       "id": "wakatime",
@@ -105,7 +105,7 @@
       "capabilities": [
         "modes"
       ],
-      "installCount": 118
+      "installCount": 120
     },
     {
       "id": "protected-paths",
@@ -282,7 +282,7 @@
         "context",
         "commands"
       ],
-      "installCount": 85
+      "installCount": 86
     },
     {
       "id": "context-autocompletion-words",
@@ -307,7 +307,7 @@
         "tools",
         "code-intelligence"
       ],
-      "installCount": 93
+      "installCount": 94
     },
     {
       "id": "plannotator",
@@ -413,7 +413,7 @@
         "tools",
         "search"
       ],
-      "installCount": 33
+      "installCount": 34
     },
     {
       "id": "seek",
@@ -442,7 +442,7 @@
       "capabilities": [
         "metrics"
       ],
-      "installCount": 114
+      "installCount": 116
     },
     {
       "id": "verifier",
@@ -455,7 +455,7 @@
         "workflows",
         "ui"
       ],
-      "installCount": 62
+      "installCount": 63
     },
     {
       "id": "bmad",
@@ -544,7 +544,7 @@
         "events",
         "ui"
       ],
-      "installCount": 43
+      "installCount": 44
     },
     {
       "id": "codegraph",
@@ -569,7 +569,7 @@
       "capabilities": [
         "ui"
       ],
-      "installCount": 52
+      "installCount": 53
     },
     {
       "id": "doom",
@@ -594,7 +594,7 @@
         "agents",
         "example"
       ],
-      "installCount": 68
+      "installCount": 72
     },
     {
       "id": "wigolo",
@@ -607,7 +607,7 @@
         "tools",
         "search"
       ],
-      "installCount": 73
+      "installCount": 75
     },
     {
       "id": "destructive-command-guard",
@@ -632,7 +632,7 @@
       "capabilities": [
         "ui"
       ],
-      "installCount": 58
+      "installCount": 60
     },
     {
       "id": "skill-gallery",
@@ -644,7 +644,7 @@
       "capabilities": [
         "ui"
       ],
-      "installCount": 166
+      "installCount": 168
     },
     {
       "id": "task-scheduler",
@@ -670,7 +670,7 @@
       "capabilities": [
         "ui"
       ],
-      "installCount": 142
+      "installCount": 146
     },
     {
       "id": "dbx",
@@ -695,7 +695,7 @@
         "ui",
         "commands"
       ],
-      "installCount": 16
+      "installCount": 18
     }
   ]
 }
