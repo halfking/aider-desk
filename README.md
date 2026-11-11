@@ -178,8 +178,10 @@ AiderDesk is released under the [Apache License 2.0](LICENSE).
 ## 最近更新
 
 
+
 ### 2026-11-11
 
+- chore: 自动同步更新 - 20261111 (huangzhouzixuan, 52 秒钟前)
 - docs: updated star history (github-actions[bot], 6 小时前)
 - chore: added eslint-disable for react-compiler directive in SidebarGroupTree (wladimiiir, 16 小时前)
 - style: updated undo context change button to primary color (wladimiiir, 16 小时前)
@@ -195,6 +197,7 @@ AiderDesk is released under the [Apache License 2.0](LICENSE).
 - docs: updated star history (github-actions[bot], 29 小时前)
 - chore: update extension install counts (GitHub Action, 30 小时前)
 - 文件更新: CHANGELOG.md
+- 文件更新: README.md
 - 文件更新: docs-site/static/img/.star-history.sig
 - 文件更新: docs-site/static/img/star-history-dark.svg
 - 文件更新: docs-site/static/img/star-history-light.svg
@@ -213,5 +216,4 @@ AiderDesk is released under the [Apache License 2.0](LICENSE).
 - 文件更新: src/main/git/__tests__/git-manager.restoreFile.test.ts
 - 文件更新: src/main/git/__tests__/git-manager.updated-files.test.ts
 - 文件更新: src/main/git/git-manager.ts
-- 文件更新: src/main/utils/i18n.ts
 
