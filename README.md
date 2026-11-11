@@ -174,3 +174,44 @@ Thank you ❤️
 ## 📄 License
 
 AiderDesk is released under the [Apache License 2.0](LICENSE).
+
+## 最近更新
+
+
+### 2026-11-11
+
+- docs: updated star history (github-actions[bot], 6 小时前)
+- chore: added eslint-disable for react-compiler directive in SidebarGroupTree (wladimiiir, 16 小时前)
+- style: updated undo context change button to primary color (wladimiiir, 16 小时前)
+- feat: added copy branch name action to Git branch menus (wladimiiir, 16 小时前)
+- chore: updated CHANGELOG (wladimiiir, 16 小时前)
+- chore: moved OpenLLM provider entry to 0.92.0 release notes (wladimiiir, 16 小时前)
+- fix: strip trailing slashes from LANGFUSE_HOST for OpenTelemetry export (Haris Farooq, 16 小时前)
+- fix: load German strings in the main process (Ting Zhang, 16 小时前)
+- fix: included year in task sidebar date groups for non-current years (wladimiiir, 19 小时前)
+- perf: improved app focus responsiveness by limiting Git refreshes (wladimiiir, 17 小时前)
+- feat: added OpenLLM provider (Jonathan, 17 小时前)
+- chore: update extension install counts (GitHub Action, 21 小时前)
+- docs: updated star history (github-actions[bot], 29 小时前)
+- chore: update extension install counts (GitHub Action, 30 小时前)
+- 文件更新: CHANGELOG.md
+- 文件更新: docs-site/static/img/.star-history.sig
+- 文件更新: docs-site/static/img/star-history-dark.svg
+- 文件更新: docs-site/static/img/star-history-light.svg
+- 文件更新: docs-site/static/img/star-history.png
+- 文件更新: electron.vite.config.ts
+- 文件更新: llms.txt
+- 文件更新: package-lock.json
+- 文件更新: package.json
+- 文件更新: packages/app/package.json
+- 文件更新: packages/common/src/locales/it.json
+- 文件更新: packages/extensions/extensions.json
+- 文件更新: packages/extensions/extensions/cursor-sdk/__tests__/task.test.ts
+- 文件更新: packages/extensions/extensions/cursor-sdk/index.ts
+- 文件更新: packages/extensions/extensions/cursor-sdk/task.ts
+- 文件更新: src/main/git/__tests__/git-manager.commit.test.ts
+- 文件更新: src/main/git/__tests__/git-manager.restoreFile.test.ts
+- 文件更新: src/main/git/__tests__/git-manager.updated-files.test.ts
+- 文件更新: src/main/git/git-manager.ts
+- 文件更新: src/main/utils/i18n.ts
+
