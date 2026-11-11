@@ -179,9 +179,11 @@ AiderDesk is released under the [Apache License 2.0](LICENSE).
 
 
 
+
 ### 2026-11-11
 
-- chore: 自动同步更新 - 20261111 (huangzhouzixuan, 52 秒钟前)
+- chore: 自动同步更新 - 20261111 (huangzhouzixuan, 72 秒钟前)
+- chore: 自动同步更新 - 20261111 (huangzhouzixuan, 2 分钟前)
 - docs: updated star history (github-actions[bot], 6 小时前)
 - chore: added eslint-disable for react-compiler directive in SidebarGroupTree (wladimiiir, 16 小时前)
 - style: updated undo context change button to primary color (wladimiiir, 16 小时前)
