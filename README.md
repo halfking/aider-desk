@@ -180,18 +180,20 @@ AiderDesk is released under the [Apache License 2.0](LICENSE).
 
 
 
+
 ### 2026-11-11
 
-- chore: 自动同步更新 - 20261111 (huangzhouzixuan, 72 秒钟前)
 - chore: 自动同步更新 - 20261111 (huangzhouzixuan, 2 分钟前)
+- chore: 自动同步更新 - 20261111 (huangzhouzixuan, 3 分钟前)
+- chore: 自动同步更新 - 20261111 (huangzhouzixuan, 4 分钟前)
 - docs: updated star history (github-actions[bot], 6 小时前)
 - chore: added eslint-disable for react-compiler directive in SidebarGroupTree (wladimiiir, 16 小时前)
 - style: updated undo context change button to primary color (wladimiiir, 16 小时前)
 - feat: added copy branch name action to Git branch menus (wladimiiir, 16 小时前)
 - chore: updated CHANGELOG (wladimiiir, 16 小时前)
-- chore: moved OpenLLM provider entry to 0.92.0 release notes (wladimiiir, 16 小时前)
-- fix: strip trailing slashes from LANGFUSE_HOST for OpenTelemetry export (Haris Farooq, 16 小时前)
-- fix: load German strings in the main process (Ting Zhang, 16 小时前)
+- chore: moved OpenLLM provider entry to 0.92.0 release notes (wladimiiir, 17 小时前)
+- fix: strip trailing slashes from LANGFUSE_HOST for OpenTelemetry export (Haris Farooq, 17 小时前)
+- fix: load German strings in the main process (Ting Zhang, 17 小时前)
 - fix: included year in task sidebar date groups for non-current years (wladimiiir, 19 小时前)
 - perf: improved app focus responsiveness by limiting Git refreshes (wladimiiir, 17 小时前)
 - feat: added OpenLLM provider (Jonathan, 17 小时前)
